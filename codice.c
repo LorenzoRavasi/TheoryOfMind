@@ -11,10 +11,9 @@
 #include <ESP32Servo.h>
 #include <IRremote.h>
 
-Tb6612fng motor(27, 14, 12, 13);
+Tb6612fng motor(27, 14, 12, 13, 26, 25, 33);
 
 Servo myservo;
-IRrecv irrecv(RECV_PIN);
 decode_results results1;
 decode_results results2;
 decode_results results3;
@@ -27,7 +26,14 @@ int posServo = 0;
 int servoPin = 13;
 int RECV_PIN = 15;
 float speed = 0.7;
-uint16_t RECV_PIN = 4;
+//uint16_t RECV_PIN = 4;
+IRrecv irrecv(RECV_PIN);
+
+void setup() {
+
+    test();   
+        
+}
 
 void test(){
         
@@ -35,9 +41,6 @@ void test(){
         Serial.printf("Welcome, this is Robot 1");
         Serial.printf("Starting initialization tests");
         
-        //test componenti
-
-        try{
         //test motori
         Serial.printf("Starting motors test");
         motor.drive(0.5, 500);
@@ -82,9 +85,20 @@ void test(){
             Serial.println((uint32_t) (results2.value & 0xFFFFFFFF), HEX);
         }
         Serial.printf("Distance test successfully executed");
+        
         Serial.printf("Initialization tests successfully completed");
 
         stateCurrent = 1;
+}
+
+
+void loop() {
+
+    movement(movementStatus);
+    //servoMotorMovement(servoStauts);
+    //distance();
+    //laterladistance();
+
 }
 
 void movement(int movementStatus){
@@ -93,100 +107,110 @@ void movement(int movementStatus){
   {
     case 0:
         //movement start
-        digitalwrite(27, speed);
-        digitalwrite(12, speed);
-        digitalwrite(14, speed/2);
-        digitalwrite(13, speed/2);
+        digitalWrite(27, speed);
+        digitalWrite(12, speed);
+        digitalWrite(14, speed/2);
+        digitalWrite(13, speed/2);
         delay(250);
         movementStatus = 1;
+        break;
         
     case 1:
         //movement
     while(movementStatus = 1){
-        digitalwrite(27, speed/2);
-        digitalwrite(12, speed/2);
-        digitalwrite(14, speed);
-        digitalwrite(13, speed);
+        digitalWrite(27, speed/2);
+        digitalWrite(12, speed/2);
+        digitalWrite(14, speed);
+        digitalWrite(13, speed);
         delay(500);
-        digitalwrite(27, speed);
-        digitalwrite(12, speed);
-        digitalwrite(14, speed/2);
-        digitalwrite(13, speed/2);
+        digitalWrite(27, speed);
+        digitalWrite(12, speed);
+        digitalWrite(14, speed/2);
+        digitalWrite(13, speed/2);
         delay(500);
-    }
+        break;
     
     case 2:
         //rotation 90 clockwise
         speed = 1;
-        digitalwrite(27, 0);
-        digitalwrite(12, 0);
-        digitalwrite(14, speed);
-        digitalwrite(13, speed);
+        digitalWrite(27, 0);
+        digitalWrite(12, 0);
+        digitalWrite(14, speed);
+        digitalWrite(13, speed);
         delay(1000);
         speed = 0.7;
+        break;
         
     case 3:
         //rotation 90 clockwise
         speed = 1;
-        digitalwrite(27, speed);
-        digitalwrite(12, speed);
-        digitalwrite(14, 0);
-        digitalwrite(13, 0);
+        digitalWrite(27, speed);
+        digitalWrite(12, speed);
+        digitalWrite(14, 0);
+        digitalWrite(13, 0);
         delay(1000);
         speed = 0.7;
-  }
-
+        break;
+  
     case 4:
        //free rotation
+       break;
 
     case 5:
        //stop
-        digitalwrite(27, speed/2);
-        digitalwrite(12, speed/2);
-        digitalwrite(14, speed);
-        digitalwrite(13, speed);
+        digitalWrite(27, speed/2);
+        digitalWrite(12, speed/2);
+        digitalWrite(14, speed);
+        digitalWrite(13, speed);
         delay(250);
-        digitalwrite(27, 0);
-        digitalwrite(12, 0);
-        digitalwrite(14, 0);
-        digitalwrite(13, 0);
+        digitalWrite(27, 0);
+        digitalWrite(12, 0);
+        digitalWrite(14, 0);
+        digitalWrite(13, 0);
+        break;
     
     case 6:
        //reverse
         speed = -0.3;
-        digitalwrite(27, speed);
-        digitalwrite(12, speed);
-        digitalwrite(14, speed);
-        digitalwrite(13, speed);
+        digitalWrite(27, speed);
+        digitalWrite(12, speed);
+        digitalWrite(14, speed);
+        digitalWrite(13, speed);
         speed = 0.7;
+        break;
 
     case 7:
        //stall
          speed = 0;
-         digitalwrite(27, speed);
-         digitalwrite(12, speed);
-         digitalwrite(14, speed);
-         digitalwrite(13, speed);
+         digitalWrite(27, speed);
+         digitalWrite(12, speed);
+         digitalWrite(14, speed);
+         digitalWrite(13, speed);
          speed = 0.7;
+         break;
 
     case 8:
        //lateral adjustment with right tyre
        speed = -0.7;
-       digitalwrite(27, speed);
-       digitalwrite(12, speed);
+       digitalWrite(27, speed);
+       digitalWrite(12, speed);
        delay(250);
-       movement(7);
+       //movement(7);
+       break;
 
     case 9:
        //lateral adjustment with right tyre
        speed = -0.7;
-       digitalwrite(14, speed);
-       digitalwrite(13, speed);
+       digitalWrite(14, speed);
+       digitalWrite(13, speed);
        delay(250);
-       movement(7);
+       //movement(7);
+       break;
+    }
+}
 }
 
-void distance(){
+/*void distance(){
 
     irrecv.enableIRIn();
         if (irrecv.decode(&results1)) 
@@ -266,7 +290,8 @@ void servoMotorMovement(int servoStauts){
         myservo.setPeriodHertz(50);
         myservo.attach(servoPin, 500, 2400);
 
-        switch(servoStatus){
+        switch(servoStatus)
+        {
           
           case 0:
           for (posServo = 0; posServo <= 180; posServo += 1) {
@@ -285,20 +310,4 @@ void servoMotorMovement(int servoStauts){
             delay(15);         
           }
         }
-}
-
-
-void setup() {
-
-    test();        
-        
-}
-
-void loop() {
-
-    movement(movementStatus);
-    servoMotorMovement(servoStauts);
-    distance();
-    laterladistance();
-
-}
+}*/
