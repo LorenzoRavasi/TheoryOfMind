@@ -1,3 +1,4 @@
+#include <IRremote.hpp>
 #include <ESP32Servo.h>
 
 #define PIN_SX1  14 
@@ -8,6 +9,8 @@
 #define PIN_DX2  25 
 #define PIN_DXEN  33 
 
+#define PACKET_DIMENSION 32
+
 Servo myservo;
 
 int speed;
@@ -15,8 +18,8 @@ int stop = 0;
 int movementType = 0;
 int servoPin = 32;
 int posServo;
-int IRSensor = 23;
-int IRSensor2 = 17;
+//by defualt sender object,pin 4
+IRsend ir_sender;
 
 void setup() {
   // initialize digital pins as outputs.
@@ -236,5 +239,8 @@ void loop() {
   servoMovement();
   movement(3);
   delay(60000);
-
+}
+void send_packet()
+{
+  ir_sender.sendSony(0xE0E0906F, PACKET_DIMENSION);
 }
