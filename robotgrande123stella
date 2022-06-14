@@ -1,4 +1,3 @@
-#include <IRremote.hpp>
 #include <ESP32Servo.h>
 
 #define PIN_SX1  14 
@@ -9,8 +8,6 @@
 #define PIN_DX2  25 
 #define PIN_DXEN  33 
 
-#define PACKET_DIMENSION 32
-
 Servo myservo;
 
 int speed;
@@ -18,8 +15,9 @@ int stop = 0;
 int movementType = 0;
 int servoPin = 32;
 int posServo;
-//by defualt sender object,pin 4
-IRsend ir_sender;
+int IRSensor = 23;
+int IRSensor2 = 17;
+int Send = 34;
 
 void setup() {
   // initialize digital pins as outputs.
@@ -33,214 +31,125 @@ void setup() {
   digitalWrite(27, HIGH);
   Serial.begin(9600);
   pinMode (IRSensor, INPUT); // sensor pin INPUT
-}
-
-void movement(int movementStatus)
-{
-  switch(movementStatus)
-  {
-    case 0:
-        //status:stall position:straight
-        speed = 120;
-        analogWrite(PIN_SXEN, speed);
-        analogWrite(PIN_DXEN, speed);
-        
-        break;
-
-    case 1:
-        //rotation clockwise
-        speed = 120;
-        analogWrite(PIN_SXEN, speed);
-        analogWrite(PIN_DXEN, 0);
-        delay(100);
-        
-        break;
-
-    case 2:
-        //rotation anticlockwise
-        speed = 120;
-        analogWrite(PIN_SXEN, 0);
-        analogWrite(PIN_DXEN, speed);
-        delay(100);
-        
-        break;
-
-    case 3:
-        //stall
-       speed = 0;
-       analogWrite(PIN_SXEN, 0);
-       analogWrite(PIN_DXEN, 0);
-
-       break;
-
-    case 4:
-       //retro
-       digitalWrite(PIN_SX1, LOW);
-       digitalWrite(PIN_SX2, HIGH);
-       digitalWrite(PIN_DX1, LOW);
-       digitalWrite(PIN_DX2, HIGH);
-
-       speed = 70;
-       analogWrite(PIN_SXEN, speed);
-       analogWrite(PIN_DXEN, speed);
-       break;
-
-    case 5:
-       //reset in opposite direction to the wall
-       digitalWrite(PIN_SX1, HIGH);
-       digitalWrite(PIN_SX2, LOW);
-       digitalWrite(PIN_DX1, HIGH);
-       digitalWrite(PIN_DX2, LOW);
-
-       analogWrite(PIN_SXEN, 60);
-       analogWrite(PIN_DXEN, 0);
-       break;
-
-    case 6:
-       //reset in opposite direction to the wall
-       digitalWrite(PIN_SX1, HIGH);
-       digitalWrite(PIN_SX2, LOW);
-       digitalWrite(PIN_DX1, HIGH);
-       digitalWrite(PIN_DX2, LOW);
-
-       analogWrite(PIN_SXEN, 0);
-       analogWrite(PIN_DXEN, 60);
-       break;
-  }
-       
+  pinMode(Send, OUTPUT); 
 }
 
 void servoMovement()
 {
     myservo.attach(servoPin, 500, 2400);
-    myservo.setPeriodHertz(50);
+    myservo.setPeriodHertz(150);
     
-    for (posServo = 0; posServo <= 180; posServo += 1) {
+    for (posServo = 0; posServo <= 90; posServo += 1) {
        myservo.write(posServo);    
        delay(15);             
     }
     
-    for (posServo = 180; posServo >= 0; posServo -= 1) {
+    for (posServo = 90; posServo >= 0; posServo -= 1) {
        myservo.write(posServo);  
        delay(15);         
     }
 }
 
-void distance()
+void distanceLeft()
 {
   int statusSensor = digitalRead (IRSensor);
-  int statusSensor2 = digitalRead (IRSensor2);
-  if(statusSensor==LOW && statusSensor2==HIGH){
-    Serial.println("Obstacle Left");    
-    speed = 0;
-    analogWrite(PIN_SXEN, speed);
-    analogWrite(PIN_DXEN, speed);
-    delay(1000);
-    
-    digitalWrite(PIN_SX1, LOW);
-    digitalWrite(PIN_SX2, HIGH);
-    digitalWrite(PIN_DX1, LOW);
-    digitalWrite(PIN_DX2, HIGH);
-
+  if(statusSensor==LOW){
+    Serial.println("Obstacle");
     speed = 70;
     analogWrite(PIN_SXEN, speed);
-    analogWrite(PIN_DXEN, speed);   
-    delay(1000);
-
-    digitalWrite(PIN_SX1, HIGH);
-    digitalWrite(PIN_SX2, LOW);
-    digitalWrite(PIN_DX1, HIGH);
-    digitalWrite(PIN_DX2, LOW);
-
-    analogWrite(PIN_SXEN, 60);
     analogWrite(PIN_DXEN, 0);
-    delay(100);
-  }
-  else if(statusSensor==HIGH && statusSensor2==LOW){
-    Serial.println("Obstacle Right");    
-    speed = 0;
+    delay(90);
+    speed = 160;
     analogWrite(PIN_SXEN, speed);
     analogWrite(PIN_DXEN, speed);
-    delay(1000);
-    
-    digitalWrite(PIN_SX1, LOW);
-    digitalWrite(PIN_SX2, HIGH);
-    digitalWrite(PIN_DX1, LOW);
-    digitalWrite(PIN_DX2, HIGH);
+    delay(150);  
+  }
+  else{
+    Serial.println("Free");
+  }
+  delay(50);
+}
 
+void distanceRight()
+{
+  int statusSensor2 = digitalRead (IRSensor2);
+  if(statusSensor2==LOW){
+    Serial.println("Obstacle");
     speed = 70;
-    analogWrite(PIN_SXEN, speed);
-    analogWrite(PIN_DXEN, speed);   
-    delay(1000);
-
-    digitalWrite(PIN_SX1, HIGH);
-    digitalWrite(PIN_SX2, LOW);
-    digitalWrite(PIN_DX1, HIGH);
-    digitalWrite(PIN_DX2, LOW);
-
     analogWrite(PIN_SXEN, 0);
-    analogWrite(PIN_DXEN, 60);
-    delay(100);
+    analogWrite(PIN_DXEN, speed);
+    delay(90);
+    speed = 160;
+    analogWrite(PIN_SXEN, speed);
+    analogWrite(PIN_DXEN, speed);
+    delay(150);    
   }
-
-  else if(statusSensor==HIGH && statusSensor2==LOW)
-  {
-    Serial.println("Double Obstacle");    
-    digitalWrite(PIN_SX1, HIGH);
-    digitalWrite(PIN_SX2, LOW);
-    digitalWrite(PIN_DX1, HIGH);
-    digitalWrite(PIN_DX2, LOW);
-
-    analogWrite(PIN_SXEN, 30);
-    analogWrite(PIN_DXEN, 30);
-    delay(100);
-  }
-
-  else {
-     Serial.println("Free"); 
+  else{
+    Serial.println("Free");
   }
   delay(50);
 }
 
 void loop() {
 
+  delay(5000);
   //movimento in avanti
   digitalWrite(PIN_SX1, HIGH);
   digitalWrite(PIN_SX2, LOW);
   digitalWrite(PIN_DX1, HIGH);
   digitalWrite(PIN_DX2, LOW);
 
-  movement(0);
-  delay(100);
+  speed = 120;
   servoMovement();
-  distance();
-  delay(100);
-  movement(1);
-  delay(100);
-  servoMovement();
-  movement(3);
-  servoMovement();
-  movement(2);
-  delay(100);
-  servoMovement();
-  movement(3);
+  analogWrite(PIN_SXEN, speed);
+  analogWrite(PIN_DXEN, speed);
+  distanceLeft();
+  distanceRight();
+  delay(4500);
 
-  movement(0);
+  speed = 248;
+  analogWrite(PIN_SXEN, speed);
+  analogWrite(PIN_DXEN, 0);
+  delay(1800);
+  analogWrite(Send, 0xFF);
+  delay(50);
+  analogWrite(PIN_SXEN, 0);
+  analogWrite(PIN_DXEN, 0);
+  delay(3000);
+
+  speed = 248;
+  analogWrite(PIN_SXEN, speed);
+  analogWrite(PIN_DXEN, 0);
+  delay(1600);
+  analogWrite(PIN_SXEN, 0);
+  analogWrite(PIN_DXEN, 0);
   servoMovement();
-  distance();
-  delay(100);
-  movement(1);
-  delay(100);
+  delay(1000);
+  
+  speed = 190;
   servoMovement();
-  movement(3);
-  servoMovement();
-  movement(2);
-  delay(100);
-  servoMovement();
-  movement(3);
-  delay(60000);
-}
-void send_packet()
-{
-  ir_sender.sendSony(0xE0E0906F, PACKET_DIMENSION);
+  analogWrite(PIN_SXEN, speed);
+  analogWrite(PIN_DXEN, speed);
+  distanceLeft();
+  distanceRight();
+  delay(5000);
+    
+  speed = 248;
+  analogWrite(PIN_SXEN, speed);
+  analogWrite(PIN_DXEN, 0);
+  delay(1800);
+  analogWrite(Send, 0xFF);
+  delay(50);
+  analogWrite(PIN_SXEN, 0);
+  analogWrite(PIN_DXEN, 0);
+  delay(3000);
+  
+  speed = 248;
+  analogWrite(PIN_SXEN, speed);
+  analogWrite(PIN_DXEN, 0); 
+  delay(1600);
+  analogWrite(PIN_SXEN, 0);
+  analogWrite(PIN_DXEN, 0);
+  servoMovement();  
+  delay(10000);
 }
