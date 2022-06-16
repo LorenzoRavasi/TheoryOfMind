@@ -102,7 +102,7 @@ void loop() {
   speed = 120;
   servoMovement();
   analogWrite(PIN_SXEN, speed);
-  analogWrite(PIN_DXEN, speed);
+  analogWrite(PIN_DXEN, speed + 2);
   distanceLeft();
   distanceRight();
   delay(4500);
@@ -117,19 +117,19 @@ void loop() {
   analogWrite(PIN_DXEN, 0);
   delay(3000);
 
-  speed = 248;
+  speed = 238;
   analogWrite(PIN_SXEN, speed);
   analogWrite(PIN_DXEN, 0);
-  delay(1795);
+  delay(1650);
   analogWrite(PIN_SXEN, 0);
   analogWrite(PIN_DXEN, 0);
   servoMovement();
   delay(1000);
   
-  speed = 190;
+  speed = 150;
   servoMovement();
   analogWrite(PIN_SXEN, speed);
-  analogWrite(PIN_DXEN, speed);
+  analogWrite(PIN_DXEN, speed + 2);
   distanceLeft();
   distanceRight();
   delay(5000);
@@ -144,13 +144,14 @@ void loop() {
   analogWrite(PIN_DXEN, 0);
   delay(3000);
   
-  speed = 248;
+  speed = 232;
   analogWrite(PIN_SXEN, speed);
   analogWrite(PIN_DXEN, 0); 
-  delay(1795);
+  delay(1650);
   analogWrite(PIN_SXEN, 0);
   analogWrite(PIN_DXEN, 0);
   servoMovement();  
   delay(10000);
+
 
 }
